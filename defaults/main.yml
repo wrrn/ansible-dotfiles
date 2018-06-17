@@ -1,0 +1,7 @@
+---
+stow_pkg_name: "stow"
+
+dotfiles_repo: "https://github.com/wrrn/dotfiles.git"
+dotfiles_repo_accept_hostkey: yes
+dotfiles_local_path: "{{ ansible_env.HOME }}/dotfiles"
+

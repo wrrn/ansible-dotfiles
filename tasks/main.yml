@@ -1,0 +1,31 @@
+---
+- name: Ensure stow is installed locally
+  package:
+    name: "{{ stow_pkg_name }}"
+    state: latest
+    
+- name: Ensure that dotfiles are cloned locally
+  git:
+    repo: "{{ dotfiles_repo }}"
+    dest: "{{ dotfiles_local_path }}"
+    accept_hostkey: "{{ dotfiles_repo_accept_hostkey}}"
+  become: no
+
+- name: Find the dotfiles that need backed up
+  script: find_dotfiles.sh "{{ ansible_env.HOME }}" "{{ dotfiles_local_path }}"
+  register: existing_dotfiles
+
+- name: Backup the existing dotfiles
+  command: mv -n "{{ ansible_env.HOME }}/{{ item }}" '{{ ansible_env.HOME }}/{{ item }}.bak'
+  args:
+    creates: '{{ ansible_env.HOME }}/{{ item }}.bak'
+  with_items: "{{ existing_dotfiles.stdout_lines }}"
+
+- name: Use stow to install the dotfiles
+  shell: find "{{ dotfiles_local_path }}" -maxdepth 1 -type d -not -path {{ dotfiles_local_path }} -not -name .git -exec basename {} \; | xargs stow -t "{{ ansible_env.HOME }}" -d "{{ dotfiles_local_path }}"
+  
+
+  
+  
+  
+    
